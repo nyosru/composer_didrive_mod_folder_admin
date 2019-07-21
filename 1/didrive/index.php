@@ -1,5 +1,19 @@
 <?php
 
+// только я могу 
+if (isset($_SESSION['now_user_di']['soc_web_id']) && $_SESSION['now_user_di']['soc_web_id'] == 5903492) {
+    
+} else {
+    f\redirect('/', 'i.didrive.php');
+}
+
+require_once dirname(__FILE__).'/../../class.php';
+
+
+
+
+
+
 
 
 
@@ -9,11 +23,6 @@
 //        $s->execute( array( ':table' => $table ) );
 //        $r = $s->fetchAll();
 //        \f\pa($r);
-
-
-
-
-
 //
 //// echo '<br/>'.__FILE__.' ('.__LINE__.')';
 //
@@ -135,4 +144,4 @@ $vv['krohi'][1] = array(
 //$vv['list'] = \Nyos\mod\items::getItems( $db, $vv['folder'], $vv['now_level']['cfg.level'], null);
 //\f\pa($vv['list']);
 
-$vv['tpl_body'] = \f\like_tpl('body', dir_mods_mod_vers_didrive_tpl,  dir_site_module_nowlev_tpldidr, DR );
+$vv['tpl_body'] = \f\like_tpl('body', dir_mods_mod_vers_didrive_tpl, dir_site_module_nowlev_tpldidr, DR);

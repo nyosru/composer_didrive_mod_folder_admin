@@ -1,23 +1,30 @@
 
 <div class="container-fluid">
     <div class="grid">
+        <div class="row">
+            <div class="col-xs-12 col-xl-12">
 
-        {# list #}
+                {% set list = getListFolder() %}
+                {{ pa(list) }}
+                
+                {# list #}
 
-        {# если редактирование, то показываем форму редактирования #}
+                {# если редактирование, то показываем форму редактирования #}
 
-        {#
-            {% if get.edit_id is defined and list.data[get.edit_id] is defined %}
+                {#
+                    {% if get.edit_id is defined and list.data[get.edit_id] is defined %}
+        
+                        {% include 'vendor/didrive_mod/items/1/didrive/t/body.form_add.htm' %}
+        
+                    {% else %}
+        
+                        {% include 'vendor/didrive_mod/items/1/didrive/t/body.form_add.htm' %}
+                        {% include 'vendor/didrive_mod/items/1/didrive/t/body.list_items.htm' %}
+        
+                    {% endif %}
+                #}
 
-                {% include 'vendor/didrive_mod/items/1/didrive/t/body.form_add.htm' %}
-
-            {% else %}
-
-                {% include 'vendor/didrive_mod/items/1/didrive/t/body.form_add.htm' %}
-                {% include 'vendor/didrive_mod/items/1/didrive/t/body.list_items.htm' %}
-
-            {% endif %}
-        #}
-
+            </div>
+        </div>
     </div>
 </div>
