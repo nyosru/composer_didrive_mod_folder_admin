@@ -11,18 +11,22 @@ if (!defined('IN_NYOS_PROJECT'))
 
 class FolderAdmin {
 
-    // public static $dir_img_server = false;
+    /**
+     * переменная для конекта к БД
+     * @var type 
+     */
+    public static $db = false;
 
-    public static function getList() {
 
+    public static function dbConect() {
 
         if (!extension_loaded('PDO')) {
             throw new \Exception(' pdo bd не доступен ');
         }
 
-        if (is_dir($_SERVER['DOCUMENT_ROOT'] . '/sites')) {
+        if (file_exists($_SERVER['DOCUMENT_ROOT'] . '/sites/db.sqllite.sl3')) {
             $SqlLiteFile = $_SERVER['DOCUMENT_ROOT'] . '/sites/db.sqllite.sl3';
-        } elseif (is_dir($_SERVER['DOCUMENT_ROOT'] . '/site')) {
+        } elseif (file_exists($_SERVER['DOCUMENT_ROOT'] . '/site/db.sqllite.sl3')) {
             $SqlLiteFile = $_SERVER['DOCUMENT_ROOT'] . '/site/db.sqllite.sl3';
         } else {
             throw new \Exception(' не определена папка важная ');
@@ -30,34 +34,65 @@ class FolderAdmin {
 
 //echo $SqlLiteFile;
 
-        $db = new \PDO('sqlite:' . $SqlLiteFile, null, null, array(
+        self::$db = new \PDO('sqlite:' . $SqlLiteFile, null, null, array(
             \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
             \PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC
         ));
 //$db->exec('PRAGMA journal_mode=WAL;');
 
+    }
+
+    public static function domainUnlink(string $domain) {
+
+        if( self::$db === false )
+        self::dbConect();
+
+        $ff = self::$db->prepare('UPDATE `2domain` SET `folder` = NULL WHERE `domain` = :domain ;');
+        $ff->execute([':domain' => $domain]);
+
+        return true;
+    }
+
+    public static function domainLink(string $domain, string $folder) {
+
+        if( self::$db === false )
+        self::dbConect();
+
+        $ff = self::$db->prepare('UPDATE `2domain` SET `folder` = :folder WHERE `domain` = :domain ;');
+        $ff->execute([':domain' => $domain, ':folder' => $folder]);
+
+        return true;
+    }
+
+    // public static $dir_img_server = false;
+
+    public static function getList() {
+
+
         try {
 
-            $ff = $db->prepare('SELECT * FROM `2domain` ');
+        if( self::$db === false )
+        self::dbConect();
+
+            $ff = self::$db->prepare('SELECT * FROM `2domain` ');
             $ff->execute();
 
             //$f = $ff->fetchAll();
             $f = [];
-            while( $f2 = $ff->fetch() ){
-                
+            while ($f2 = $ff->fetch()) {
+
                 if (strpos($f2['domain'], 'xn--') !== false) {
 
                     $Punycode = new \TrueBV\Punycode();
                     //var_dump($Punycode->encode('renangonçalves.com'));
                     //// outputs: xn--renangonalves-pgb.com
-                    $f[$f2['folder']][ $f2['domain'] ] = $Punycode->decode($f2['domain']);
+                    $f[$f2['folder']][$f2['domain']] = $Punycode->decode($f2['domain']);
                 } else {
-                    $f[$f2['folder']][ $f2['domain'] ] = 1;
+                    $f[$f2['folder']][$f2['domain']] = 1;
                 }
-                
             }
+
             return $f;
-            
         }
 //
         catch (\PDOException $ex) {
@@ -72,16 +107,16 @@ class FolderAdmin {
             if (strpos($ex->getMessage(), 'no such table')) {
 
 // echo '<Br/>ошибка DB:' . $e->getMessage();
-                $db->exec('CREATE TABLE `2domain` ( ' .
+                self::$db->exec('CREATE TABLE `2domain` ( ' .
                         ' `domain` varchar(150) NOT NULL, ' .
                         ' `folder` varchar(150) DEFAULT NULL ' .
                         ' );');
 
-                $ff = $db->prepare('INSERT INTO  `2domain` (domain) VALUES (?)');
+                $ff = self::$db->prepare('INSERT INTO  `2domain` (domain) VALUES (?)');
                 $ff->execute([$domain]);
-                unset($ff);
-            } else {
+                // unset($ff);
 
+            } else {
                 throw new \NyosEx('непонятная ошибка DB (выбираем папку по домену): ' . $ex->getMessage());
             }
         }

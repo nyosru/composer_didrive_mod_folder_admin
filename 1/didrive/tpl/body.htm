@@ -1,13 +1,97 @@
 
 <div class="container-fluid">
     <div class="grid">
+
+        {#% set list = getListFolder() %#}
+        {% set list = folder_admin__getListFolder() %}
+        {#{ pa(list,2) }#}
+        {# list #}
+        {#{ pa(post,2) }#}
+
+        <div class="row">
+            <div class="col-xs-12 col-xl-12 text-center" style="background-color: rgba(0,250,0,0.1); padding: 5px 15px;">
+
+                <h3>Привязать домен к сайту</h3>
+                <form action="?level_di={{ get.level_di }}" method="post" >
+                    Домен <select name="domain">
+                        {% for k,v in list %}
+                            {% for k1,v1 in v %}
+                                {# если домен русский #}
+                                {% if v1 != 1 %}
+                                    <option value="{{ k1 }}">{{ v1 }}{% if k|length == 0 %} + не привязан{% endif %}</option>
+                                    {# если домен норм НЕ русский #}
+                                {% else %}
+                                    <option value="{{ k1 }}" >{{ k1 }}{% if k|length == 0 %} + не привязан{% endif %}</option>
+                                {% endif %}
+                            {% endfor %}
+
+                        {% endfor %}
+                    </select>
+                    сайт <select name="site">
+                        {% for k,v in list if k|length > 0 %}
+                            <option>{{ k }}</option>
+                        {% endfor %}
+                    </select>
+                    <button name="action" value="new_link">Связать</button>
+                    <input type="hidden" name="s" value="{{ creatSecret('new_link') }}" />
+                </form>
+
+            </div>
+        </div>
         <div class="row">
             <div class="col-xs-12 col-xl-12">
 
-                {% set list = getListFolder() %}
-                {{ pa(list) }}
-                
-                {# list #}
+                <table class='table' >
+
+                    <thead>
+                        <tr>
+                            <th>сайт</th>
+                            <th>домен(ы)</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for k,v in list %}
+                            <tr>
+                                <td>{{ k }}</td>
+                                <td>
+                                    {% set n = 0 %}
+                                    {% for k1,v1 in v %}
+
+                                        {# если домен русский #}
+                                        {% if v1 != 1 %}
+
+                                            {% if n != 0 %}<br/>{% endif %}
+                                            <a href='//{{ v1 }}' target='_blank' >{{ v1 }}</a>
+                                            <sup><a href='?level_di={{ get.level_di }}&domain_unlink={{ k1 }}&s={{ creatSecret( k1 ) }}' style='color:red;'
+
+                                                    {#
+                                                    class="base_modal_go"
+                                                    data-toggle="modal" data-target="#di_modal" 
+
+                                                    modal_header='отвязываем домен'
+                                                    ajax_link='/vendor/didrive_mod/folder_admin/1/didrive/ajax.php'
+                                                    ajax_vars='action=unlink_domain&domain={{ k1 }}&s={{ creatSecret( k1 ) }}'
+                                                    #}
+                                                    >отвязать домен</a></sup>
+                                                {% set n = 1 %}
+
+                                            {# если домен норм НЕ русский #}
+                                        {% else %}
+
+                                            {% if n != 0 %}<br/>{% endif %}
+                                            <a href='//{{ k1 }}' target='_blank' >{{ k1 }}</a>
+
+                                            <sup><a href='?level_di={{ get.level_di }}&domain_unlink={{ k1 }}&s={{ creatSecret( k1 ) }}' style='color:red;' >отвязать домен</a></sup>
+                                            {% set n = 1 %}
+                                        {% endif %}
+
+                                    {% endfor %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
 
                 {# если редактирование, то показываем форму редактирования #}
 

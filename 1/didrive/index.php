@@ -1,13 +1,15 @@
 <?php
 
+//\f\pa($_SESSION['now_user_di']);
+//die();
 // только я могу 
-if (isset($_SESSION['now_user_di']['soc_web_id']) && $_SESSION['now_user_di']['soc_web_id'] == 5903492) {
+if (isset($_SESSION['now_user_di']['soc_web_id']) && ( $_SESSION['now_user_di']['soc_web_id'] == 5903492 || $_SESSION['now_user_di']['soc_web_id'] == 10208107614107713 )) {
     
 } else {
     f\redirect('/', 'i.didrive.php');
 }
 
-require_once dirname(__FILE__).'/../../class.php';
+require_once dirname(__FILE__) . '/../../class.php';
 
 
 
@@ -143,5 +145,20 @@ $vv['krohi'][1] = array(
 );
 //$vv['list'] = \Nyos\mod\items::getItems( $db, $vv['folder'], $vv['now_level']['cfg.level'], null);
 //\f\pa($vv['list']);
+
+
+if (!empty($_REQUEST['domain_unlink']) && !empty($_REQUEST['s']) && \Nyos\Nyos::checkSecret($_REQUEST['s'], $_REQUEST['domain_unlink'])) {
+
+    if (\Nyos\mod\FolderAdmin::domainUnlink($_REQUEST['domain_unlink']) === true) {
+        $vv['warn'] = 'домен отвязан';
+    }
+}
+
+if (!empty($_REQUEST['action']) && $_REQUEST['action'] == 'new_link' && !empty($_REQUEST['s']) && \Nyos\Nyos::checkSecret($_REQUEST['s'], $_REQUEST['action'])) {
+
+    if (\Nyos\mod\FolderAdmin::domainLink($_REQUEST['domain'], $_REQUEST['site']) === true) {
+        $vv['warn'] = 'домен привязан';
+    }
+}
 
 $vv['tpl_body'] = \f\like_tpl('body', dir_mods_mod_vers_didrive_tpl, dir_site_module_nowlev_tpldidr, DR);
